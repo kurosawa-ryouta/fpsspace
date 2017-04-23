@@ -41,6 +41,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float m_NextStep;
         private bool m_Jumping;
         private AudioSource m_AudioSource;
+		private bool m_squat;
+		private float m_squatposition;
 
         // Use this for initialization
         private void Start()
@@ -55,12 +57,28 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
+			m_squat = false;
         }
 
 
         // Update is called once per frame
         private void Update()
         {
+			if (Input.GetKeyDown (KeyCode.C) && (m_squat == false)) {
+				GetComponent<CharacterController> ().height = 0.9f;
+				m_squatposition = -0.5f;
+				m_WalkSpeed = 1;
+				m_squat = true;
+
+			}
+
+			else if (Input.GetKeyDown (KeyCode.C) && (m_squat == true)) {
+				GetComponent<CharacterController> ().height = 1.8f;
+				m_squatposition = 0f;
+				m_WalkSpeed = 5;
+				m_squat = false;
+
+			}
             RotateView();
             // the jump state needs to read here to make sure it is not missed
             if (!m_Jump)
@@ -97,11 +115,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
             float speed;
             GetInput(out speed);
             // always move along the camera forward as it is the direction that it being aimed at
-            Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
+			Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
 
             // get a normal for the surface that is being touched to move along it
             RaycastHit hitInfo;
-            Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
+			Physics.SphereCast(transform.position, m_CharacterController.radius, Vector3.down, out hitInfo,
                                m_CharacterController.height/2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
             desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
 
@@ -190,12 +208,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     m_HeadBob.DoHeadBob(m_CharacterController.velocity.magnitude +
                                       (speed*(m_IsWalking ? 1f : m_RunstepLenghten)));
                 newCameraPosition = m_Camera.transform.localPosition;
-                newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset();
+				newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset() + m_squatposition;
             }
             else
             {
                 newCameraPosition = m_Camera.transform.localPosition;
-                newCameraPosition.y = m_OriginalCameraPosition.y - m_JumpBob.Offset();
+				newCameraPosition.y = m_OriginalCameraPosition.y - m_JumpBob.Offset() + m_squatposition;
             }
             m_Camera.transform.localPosition = newCameraPosition;
         }
