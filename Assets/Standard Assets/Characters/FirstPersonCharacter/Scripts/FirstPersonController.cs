@@ -27,10 +27,12 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
+		[SerializeField] private float m_squatspeed = 1;
 
         private Camera m_Camera;
         private bool m_Jump;
         private float m_YRotation;
+		private float m_squatposition;
         private Vector2 m_Input;
         private Vector3 m_MoveDir = Vector3.zero;
         private CharacterController m_CharacterController;
@@ -42,7 +44,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private bool m_Jumping;
         private AudioSource m_AudioSource;
 		private bool m_squat;
-		private float m_squatposition;
+		private bool m_GetC = false;
 
         // Use this for initialization
         private void Start()
@@ -64,21 +66,26 @@ namespace UnityStandardAssets.Characters.FirstPerson
         // Update is called once per frame
         private void Update()
         {
-			if (Input.GetKeyDown (KeyCode.C) && (m_squat == false)) {
-				GetComponent<CharacterController> ().height = 0.9f;
+			if (Input.GetKeyDown (KeyCode.C)) {
+				m_GetC = true;
+			}
+			if ( m_GetC && (m_squat == false)) {
+				m_CharacterController.height = 0.9f;
 				m_squatposition = -0.5f;
-				m_WalkSpeed = 1;
+				m_WalkSpeed = m_squatspeed;
 				m_squat = true;
-
+			
 			}
 
-			else if (Input.GetKeyDown (KeyCode.C) && (m_squat == true)) {
-				GetComponent<CharacterController> ().height = 1.8f;
+			else if ( m_GetC  && (m_squat == true)) {
+				m_CharacterController.height = 1.8f;
 				m_squatposition = 0f;
 				m_WalkSpeed = 5;
 				m_squat = false;
 
 			}
+			m_GetC = false;
+
             RotateView();
             // the jump state needs to read here to make sure it is not missed
             if (!m_Jump)
@@ -150,7 +157,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             m_MouseLook.UpdateCursorLock();
         }
-
+			
 
         private void PlayJumpSound()
         {
