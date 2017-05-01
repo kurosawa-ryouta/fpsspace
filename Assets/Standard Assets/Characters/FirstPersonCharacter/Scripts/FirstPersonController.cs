@@ -29,6 +29,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
 		[SerializeField] private float m_squatspeed = 1;
+		[SerializeField] private bool m_squat;
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -61,6 +62,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
 			m_WasSquat = false;
+			m_squat = false;
         }
 
 
@@ -69,18 +71,20 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
 			m_IsSquat = Input.GetKeyDown (KeyCode.C);
 
-			if (m_IsSquat && !m_WasSquat){
-				m_CharacterController.height = 0.9f;
-				m_squatposition = -0.5f;
-				m_WasSquat = true;
-			}
+			if (m_IsSquat) {
+				if (m_WasSquat) {
+					m_CharacterController.height = 0.9f;
+					m_squatposition = -0.5f;
+					m_WasSquat = true;
+					m_squat = true;
 
-			else if(m_IsSquat && m_WasSquat){
-				m_CharacterController.height = 1.8f;
-				m_squatposition = 0f;
-				m_WasSquat = false; 
+				} else {
+					m_CharacterController.height = 1.8f;
+					m_squatposition = 0f;
+					m_WasSquat = false; 
+					m_squat = false;
+				}
 			}
-
 
             RotateView();
             // the jump state needs to read here to make sure it is not missed
