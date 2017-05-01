@@ -67,22 +67,20 @@ namespace UnityStandardAssets.Characters.FirstPerson
         // Update is called once per frame
         private void Update()
         {
-			m_IsSquat = Input.GetKeyDown(KeyCode.C);
+			m_IsSquat = Input.GetKeyDown (KeyCode.C);
 
-			if (m_IsSquat && m_WasSquat == false){
+			if (m_IsSquat && !m_WasSquat){
 				m_CharacterController.height = 0.9f;
 				m_squatposition = -0.5f;
 				m_WasSquat = true;
-			
 			}
 
-			else if (m_IsSquat && m_WasSquat == true) {
+			else if(m_IsSquat && m_WasSquat){
 				m_CharacterController.height = 1.8f;
 				m_squatposition = 0f;
-				m_WasSquat = false;
-
+				m_WasSquat = false; 
 			}
-			m_IsSquat = false;
+
 
             RotateView();
             // the jump state needs to read here to make sure it is not missed
@@ -230,7 +228,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
             float vertical = CrossPlatformInputManager.GetAxis("Vertical");
 
             bool waswalking = m_IsWalking;
-			bool wassquat = m_IsSquat;
 
 #if !MOBILE_INPUT
             // On standalone builds, walk/run speed is modified by a key press.
