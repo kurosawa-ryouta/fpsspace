@@ -11,6 +11,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
     public class FirstPersonController : MonoBehaviour
     {
         [SerializeField] private bool m_IsWalking;
+		[SerializeField] private bool m_IsSquat;
         [SerializeField] private float m_WalkSpeed;
         [SerializeField] private float m_RunSpeed;
         [SerializeField] [Range(0f, 1f)] private float m_RunstepLenghten;
@@ -43,8 +44,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float m_NextStep;
         private bool m_Jumping;
         private AudioSource m_AudioSource;
-		private bool m_squat;
-		private bool m_GetC = false;
+		private float speed;
+		private bool m_WasSquat;
 
         // Use this for initialization
         private void Start()
@@ -59,32 +60,29 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
-			m_squat = false;
+			m_WasSquat = false;
         }
 
 
         // Update is called once per frame
         private void Update()
         {
-			if (Input.GetKeyDown (KeyCode.C)) {
-				m_GetC = true;
-			}
-			if ( m_GetC && (m_squat == false)) {
+			m_IsSquat = Input.GetKeyDown(KeyCode.C);
+
+			if (m_IsSquat && m_WasSquat == false){
 				m_CharacterController.height = 0.9f;
 				m_squatposition = -0.5f;
-				m_WalkSpeed = m_squatspeed;
-				m_squat = true;
+				m_WasSquat = true;
 			
 			}
 
-			else if ( m_GetC  && (m_squat == true)) {
+			else if (m_IsSquat && m_WasSquat == true) {
 				m_CharacterController.height = 1.8f;
 				m_squatposition = 0f;
-				m_WalkSpeed = 5;
-				m_squat = false;
+				m_WasSquat = false;
 
 			}
-			m_GetC = false;
+			m_IsSquat = false;
 
             RotateView();
             // the jump state needs to read here to make sure it is not missed
@@ -119,7 +117,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void FixedUpdate()
         {
-            float speed;
             GetInput(out speed);
             // always move along the camera forward as it is the direction that it being aimed at
 			Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
@@ -233,14 +230,18 @@ namespace UnityStandardAssets.Characters.FirstPerson
             float vertical = CrossPlatformInputManager.GetAxis("Vertical");
 
             bool waswalking = m_IsWalking;
+			bool wassquat = m_IsSquat;
 
 #if !MOBILE_INPUT
             // On standalone builds, walk/run speed is modified by a key press.
             // keep track of whether or not the character is walking or running
             m_IsWalking = !Input.GetKey(KeyCode.LeftShift);
+
 #endif
             // set the desired speed to be walking or running
             speed = m_IsWalking ? m_WalkSpeed : m_RunSpeed;
+			speed = m_WasSquat ? m_squatspeed : m_WalkSpeed;
+
             m_Input = new Vector2(horizontal, vertical);
 
             // normalize input if it exceeds 1 in combined length:
