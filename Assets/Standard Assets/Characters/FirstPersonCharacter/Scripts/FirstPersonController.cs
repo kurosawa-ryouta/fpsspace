@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using System.Collections;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
@@ -28,14 +27,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private float m_StepInterval;
         [SerializeField] private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
-        [SerializeField] private AudioClip m_LandSound;  		  // the sound played when character touches back on ground.
-		[SerializeField] private AudioClip m_GunSound;
+        [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
 		[SerializeField] private float m_squatspeed = 1;
 		[SerializeField] private bool m_squat;
-		[SerializeField] private GameObject Sparcle;
-		[SerializeField] private GameObject Ak;
-		[SerializeField] private GameObject Particle;
-
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -51,11 +45,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float m_NextStep;
         private bool m_Jumping;
         private AudioSource m_AudioSource;
-		private float m_speed;
+		private float speed;
 		private bool m_WasSquat;
-		private float m_cooltime;
-		private Vector3 m_hitpoint;
-		private GameObject Sparcle1;
 
         // Use this for initialization
         private void Start()
@@ -71,10 +62,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
 			m_WasSquat = false;
-			m_squat = false; 
-			m_AudioSource.clip = m_GunSound;
-			m_cooltime = 0f;
-		}
+			m_squat = false;
+        }
 
 
         // Update is called once per frame
@@ -83,7 +72,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 			m_IsSquat = Input.GetKeyDown (KeyCode.C);
 
 			if (m_IsSquat) {
-				if (!m_WasSquat) {
+				if (m_WasSquat) {
 					m_CharacterController.height = 0.9f;
 					m_squatposition = -0.5f;
 					m_WasSquat = true;
@@ -95,28 +84,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 					m_WasSquat = false; 
 					m_squat = false;
 				}
-				m_IsSquat = false;
 			}
-		
-		
-			
-				if (Input.GetMouseButtonDown (0) && m_cooltime >= 0.5f) {
-					Sparcle.gameObject.SetActive(true);
-					m_AudioSource.PlayOneShot (m_GunSound);					//サウンド
-					Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
-					RaycastHit hit;
-					if (Physics.Raycast (ray, out hit)) {		
-						m_hitpoint = hit.point;		
-						m_cooltime = 0f;									//hit.pointのためのray
-					}
-					Sparcle1 = (GameObject)Instantiate (Particle, m_hitpoint, Quaternion.identity);
-					Destroy (Sparcle1, 0.3f);							//生成して２秒後に破壊
-					StartCoroutine ("fireEffect");
-
-				}
-				m_cooltime += Time.deltaTime;								//クールタイム
-		    	
-			
 
             RotateView();
             // the jump state needs to read here to make sure it is not missed
@@ -151,7 +119,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void FixedUpdate()
         {
-            GetInput(out m_speed);
+            GetInput(out speed);
             // always move along the camera forward as it is the direction that it being aimed at
 			Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
 
@@ -161,8 +129,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
                                m_CharacterController.height/2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
             desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
 
-            m_MoveDir.x = desiredMove.x*m_speed;
-            m_MoveDir.z = desiredMove.z*m_speed;
+            m_MoveDir.x = desiredMove.x*speed;
+            m_MoveDir.z = desiredMove.z*speed;
 
 
             if (m_CharacterController.isGrounded)
@@ -183,8 +151,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
 
-            ProgressStepCycle(m_speed);
-            UpdateCameraPosition(m_speed);
+            ProgressStepCycle(speed);
+            UpdateCameraPosition(speed);
 
             m_MouseLook.UpdateCursorLock();
         }
@@ -314,13 +282,5 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
         }
-
-		private IEnumerator fireEffect()
-		{
-			yield return new WaitForSeconds (0.3f);
-
-			Sparcle.gameObject.SetActive(false);
-		
-		}
     }
 }
