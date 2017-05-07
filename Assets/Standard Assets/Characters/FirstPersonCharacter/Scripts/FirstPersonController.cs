@@ -28,8 +28,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
         [SerializeField] private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
         [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
         [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
+		[SerializeField] private AudioClip m_gunSound;    
 		[SerializeField] private float m_squatspeed = 1;
 		[SerializeField] private bool m_squat;
+		[SerializeField] private GameObject m_particlePrefab;
+		[SerializeField] private GameObject m_Ak;
+		[SerializeField] private GameObject m_muzzle;
+
 
         private Camera m_Camera;
         private bool m_Jump;
@@ -47,6 +52,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private AudioSource m_AudioSource;
 		private float speed;
 		private bool m_WasSquat;
+		private GameObject m_Sparcle;
+		private GameObject m_Sparcle1;
+		private Vector3 m_bullethitpoint;
+		private float m_cooltime;
 
         // Use this for initialization
         private void Start()
@@ -63,16 +72,18 @@ namespace UnityStandardAssets.Characters.FirstPerson
 			m_MouseLook.Init(transform , m_Camera.transform);
 			m_WasSquat = false;
 			m_squat = false;
+
         }
 
 
         // Update is called once per frame
         private void Update()
         {
+			//ｃボタン押下でしゃがみ機能
 			m_IsSquat = Input.GetKeyDown (KeyCode.C);
 
 			if (m_IsSquat) {
-				if (m_WasSquat) {
+				if (!m_WasSquat) {
 					m_CharacterController.height = 0.9f;
 					m_squatposition = -0.5f;
 					m_WasSquat = true;
@@ -85,6 +96,38 @@ namespace UnityStandardAssets.Characters.FirstPerson
 					m_squat = false;
 				}
 			}
+
+				
+			if (Input.GetMouseButtonDown (0) && m_cooltime >= 0.5f) {
+
+				//効果音
+				m_AudioSource.PlayOneShot (m_gunSound);	
+
+				//銃口の爆発エフェクト生成
+				m_Sparcle  = (GameObject)Instantiate (m_particlePrefab,m_muzzle.transform.position , Quaternion.identity);
+				m_Sparcle.transform.parent = m_muzzle.transform;
+
+				//	rayの生成
+				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+				RaycastHit hit;
+
+				//　着弾点を取得
+				if (Physics.Raycast (ray, out hit)){						
+					m_bullethitpoint = hit.point;										
+				}
+
+				//着弾点の爆発エフェクト
+				m_Sparcle1 = (GameObject)Instantiate (m_particlePrefab, m_bullethitpoint, Quaternion.identity);	
+
+				//　パーティクル削除	
+				Destroy (m_Sparcle, 0.2f);													
+				Destroy (m_Sparcle1, 0.2f);							
+
+				//　クールタイムの作成
+				m_cooltime = 0f;															
+			}
+			m_cooltime += Time.deltaTime;
+
 
             RotateView();
             // the jump state needs to read here to make sure it is not missed
