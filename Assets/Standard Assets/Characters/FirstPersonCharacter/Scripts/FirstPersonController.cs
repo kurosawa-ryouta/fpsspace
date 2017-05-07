@@ -84,69 +84,19 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		// Update is called once per frame
 		private void Update()
 		{
+
 			//ｃボタン押下でしゃがみ機能
-			m_IsSquat = Input.GetKeyDown (KeyCode.C);
+			Squat();
 
-			if (m_IsSquat) {
-				if (!m_WasSquat) {
-					m_CharacterController.height = 0.9f;
-					m_squatposition = -0.5f;
-					m_WasSquat = true;
-					m_squat = true;
-
-				} else {
-					m_CharacterController.height = 1.8f;
-					m_squatposition = 0f;
-					m_WasSquat = false; 
-					m_squat = false;
-				}
-			}
 
 			//	マウスボタン押下による爆発エフェクト生成
-			if (Input.GetMouseButtonDown (0) && m_cooltime >= 0.5f && m_bulletNum >= 0) {
-
-				//効果音
-				m_AudioSource.PlayOneShot (m_gunSound);	
-
-				//弾数減少
-				m_bulletNum --;
-				print (m_bulletBox+","+m_bulletNum);
-
-				//銃口の爆発エフェクト生成
-				m_Sparcle  = (GameObject)Instantiate (m_particlePrefab,m_muzzle.transform.position , Quaternion.identity);
-				m_Sparcle.transform.parent = m_muzzle.transform;
-
-				//	rayの生成
-				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
-				RaycastHit hit;
-
-				//　着弾点を取得
-				if (Physics.Raycast (ray, out hit)){						
-					m_bullethitpoint = hit.point;										
-				}
-
-				//着弾点の爆発エフェクト
-				m_Sparcle1 = (GameObject)Instantiate (m_particlePrefab, m_bullethitpoint, Quaternion.identity);	
-
-				//　パーティクル削除	
-				Destroy (m_Sparcle, 0.2f);													
-				Destroy (m_Sparcle1, 0.2f);							
-
-				//　クールタイムの作成
-				m_cooltime = 0f;															
-			}
+			ExplosionEffect();
 			m_cooltime += Time.deltaTime;
 
 
 			//リロード機能
-			if (Input.GetKey (KeyCode.R) && m_bulletNum < 30) {
-				m_AudioSource.PlayOneShot (m_reloadSound);
-				m_bulletBox -= m_bulletLimit;
-				m_bulletBox += m_bulletNum;
-				m_bulletNum = m_bulletLimit;
-				print (m_bulletBox+","+m_bulletNum);
+			Reload();
 
-			}
 
             RotateView();
             // the jump state needs to read here to make sure it is not missed
@@ -344,5 +294,74 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
         }
+
+		private void Squat(){
+			
+			m_IsSquat = Input.GetKeyDown (KeyCode.C);
+
+			if (m_IsSquat) {
+				if (!m_WasSquat) {
+					m_CharacterController.height = 0.9f;
+					m_squatposition = -0.5f;
+					m_WasSquat = true;
+					m_squat = true;
+
+				} else {
+					m_CharacterController.height = 1.8f;
+					m_squatposition = 0f;
+					m_WasSquat = false; 
+					m_squat = false;
+				}
+			}
+		}
+
+		private void ExplosionEffect(){
+		
+			if (Input.GetMouseButtonDown (0) && m_cooltime >= 0.5f && m_bulletNum >= 0) {
+
+				//効果音
+				m_AudioSource.PlayOneShot (m_gunSound);	
+
+				//弾数減少
+				m_bulletNum --;
+				print (m_bulletBox+","+m_bulletNum);
+
+				//銃口の爆発エフェクト生成
+				m_Sparcle  = (GameObject)Instantiate (m_particlePrefab,m_muzzle.transform.position , Quaternion.identity);
+				m_Sparcle.transform.parent = m_muzzle.transform;
+
+				//	rayの生成
+				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+				RaycastHit hit;
+
+				//　着弾点を取得
+				if (Physics.Raycast (ray, out hit)){						
+					m_bullethitpoint = hit.point;										
+				}
+
+				//着弾点の爆発エフェクト
+				m_Sparcle1 = (GameObject)Instantiate (m_particlePrefab, m_bullethitpoint, Quaternion.identity);	
+
+				//　パーティクル削除	
+				Destroy (m_Sparcle, 0.2f);													
+				Destroy (m_Sparcle1, 0.2f);							
+
+				//　クールタイムの作成
+				m_cooltime = 0f;															
+			}
+		}
+
+		private void Reload(){
+		
+			if (Input.GetKey (KeyCode.R) && m_bulletNum < 30) {
+				m_AudioSource.PlayOneShot (m_reloadSound);
+				m_bulletBox -= m_bulletLimit;
+				m_bulletBox += m_bulletNum;
+				m_bulletNum = m_bulletLimit;
+				print (m_bulletBox+","+m_bulletNum);
+
+			}
+		}
+
     }
 }
