@@ -31,7 +31,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		[SerializeField] private AudioClip m_gunSound;    
 		[SerializeField] private AudioClip m_reloadSound;  
 		[SerializeField] private float m_squatspeed = 1;
-		[SerializeField] private bool m_squat;
 		[SerializeField] private GameObject m_particlePrefab;
 		[SerializeField] private GameObject m_Ak;
 		[SerializeField] private GameObject m_muzzle;
@@ -75,7 +74,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
 			m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
 			m_WasSquat = false;
-			m_squat = false;
 			m_bulletNum = m_bulletLimit;
 
 		}
@@ -86,17 +84,21 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		{
 
 			//ｃボタン押下でしゃがみ機能
-			Squat();
-
+			if (Input.GetKeyDown (KeyCode.C)){
+				Squat ();
+			}
 
 			//	マウスボタン押下による爆発エフェクト生成
-			ExplosionEffect();
-			m_cooltime += Time.deltaTime;
-
+			if (Input.GetMouseButtonDown (0) && m_cooltime >= 0.5f && m_bulletNum >= 0) {
+				ExplosionEffect ();
+			}
+				m_cooltime += Time.deltaTime;
+			
 
 			//リロード機能
-			Reload();
-
+			if (Input.GetKey (KeyCode.R) && m_bulletNum < 30) {
+				Reload ();
+			}
 
             RotateView();
             // the jump state needs to read here to make sure it is not missed
@@ -297,28 +299,20 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
 		private void Squat(){
 			
-			m_IsSquat = Input.GetKeyDown (KeyCode.C);
-
-			if (m_IsSquat) {
 				if (!m_WasSquat) {
 					m_CharacterController.height = 0.9f;
 					m_squatposition = -0.5f;
 					m_WasSquat = true;
-					m_squat = true;
 
 				} else {
 					m_CharacterController.height = 1.8f;
 					m_squatposition = 0f;
-					m_WasSquat = false; 
-					m_squat = false;
-				}
+					m_WasSquat = false;
 			}
 		}
 
 		private void ExplosionEffect(){
-		
-			if (Input.GetMouseButtonDown (0) && m_cooltime >= 0.5f && m_bulletNum >= 0) {
-
+				
 				//効果音
 				m_AudioSource.PlayOneShot (m_gunSound);	
 
@@ -348,19 +342,15 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
 				//　クールタイムの作成
 				m_cooltime = 0f;															
-			}
 		}
 
 		private void Reload(){
-		
-			if (Input.GetKey (KeyCode.R) && m_bulletNum < 30) {
+
 				m_AudioSource.PlayOneShot (m_reloadSound);
 				m_bulletBox -= m_bulletLimit;
 				m_bulletBox += m_bulletNum;
 				m_bulletNum = m_bulletLimit;
 				print (m_bulletBox+","+m_bulletNum);
-
-			}
 		}
 
     }
