@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using System.Collections;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
@@ -36,6 +37,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		[SerializeField] private GameObject m_muzzle;
 		[SerializeField] private int m_bulletLimit = 30;
 		[SerializeField] private int m_bulletBox = 250;
+		[SerializeField] private GameObject m_enemy;
+
 
 
 		private Camera m_Camera;
@@ -52,13 +55,16 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		private float m_NextStep;
 		private bool m_Jumping;
 		private AudioSource m_AudioSource;
-		private float speed;
+		private float m_speed;
 		private bool m_WasSquat;
 		private GameObject m_Sparcle;
 		private GameObject m_Sparcle1;
 		private Vector3 m_bullethitpoint;
 		private float m_cooltime;
 		private int m_bulletNum;
+		private int score = 0;
+		private int m_enemyLife;
+
 
 		// Use this for initialization
 		private void Start()
@@ -133,7 +139,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void FixedUpdate()
         {
-            GetInput(out speed);
+            GetInput(out m_speed);
             // always move along the camera forward as it is the direction that it being aimed at
 			Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
 
@@ -143,8 +149,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
                                m_CharacterController.height/2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
             desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
 
-            m_MoveDir.x = desiredMove.x*speed;
-            m_MoveDir.z = desiredMove.z*speed;
+            m_MoveDir.x = desiredMove.x*m_speed;
+            m_MoveDir.z = desiredMove.z*m_speed;
 
 
             if (m_CharacterController.isGrounded)
@@ -165,8 +171,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
 
-            ProgressStepCycle(speed);
-            UpdateCameraPosition(speed);
+            ProgressStepCycle(m_speed);
+            UpdateCameraPosition(m_speed);
 
             m_MouseLook.UpdateCursorLock();
         }
@@ -329,8 +335,20 @@ namespace UnityStandardAssets.Characters.FirstPerson
 				RaycastHit hit;
 
 				//　着弾点を取得
-				if (Physics.Raycast (ray, out hit)){						
-					m_bullethitpoint = hit.point;										
+				if (Physics.Raycast (ray, out hit)){
+
+				m_bullethitpoint = hit.point;		
+
+					if (hit.collider.tag == "enemy") {
+					m_enemy = hit.collider.gameObject;
+					m_enemyLife = m_enemy.GetComponent<Enemy>().enemyLife;
+					m_enemyLife --;
+
+					}
+					if (hit.collider.tag == "hed") {
+						score += 10;
+					}	
+
 				}
 
 				//着弾点の爆発エフェクト
@@ -352,6 +370,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
 				m_bulletNum = m_bulletLimit;
 				print (m_bulletBox+","+m_bulletNum);
 		}
-
+			
     }
 }
