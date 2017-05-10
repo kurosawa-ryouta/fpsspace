@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using System.Collections;
 using UnityStandardAssets.CrossPlatformInput;
 using UnityStandardAssets.Utility;
 using Random = UnityEngine.Random;
@@ -9,125 +10,101 @@ namespace UnityStandardAssets.Characters.FirstPerson
     [RequireComponent(typeof (CharacterController))]
     [RequireComponent(typeof (AudioSource))]
     public class FirstPersonController : MonoBehaviour
-    {
-        [SerializeField] private bool m_IsWalking;
+	{
+		[SerializeField] private bool m_IsWalking;
 		[SerializeField] private bool m_IsSquat;
-        [SerializeField] private float m_WalkSpeed;
-        [SerializeField] private float m_RunSpeed;
-        [SerializeField] [Range(0f, 1f)] private float m_RunstepLenghten;
-        [SerializeField] private float m_JumpSpeed;
-        [SerializeField] private float m_StickToGroundForce;
-        [SerializeField] private float m_GravityMultiplier;
-        [SerializeField] private MouseLook m_MouseLook;
-        [SerializeField] private bool m_UseFovKick;
-        [SerializeField] private FOVKick m_FovKick = new FOVKick();
-        [SerializeField] private bool m_UseHeadBob;
-        [SerializeField] private CurveControlledBob m_HeadBob = new CurveControlledBob();
-        [SerializeField] private LerpControlledBob m_JumpBob = new LerpControlledBob();
-        [SerializeField] private float m_StepInterval;
-        [SerializeField] private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
-        [SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
-        [SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
+		[SerializeField] private float m_WalkSpeed;
+		[SerializeField] private float m_RunSpeed;
+		[SerializeField] [Range(0f, 1f)] private float m_RunstepLenghten;
+		[SerializeField] private float m_JumpSpeed;
+		[SerializeField] private float m_StickToGroundForce;
+		[SerializeField] private float m_GravityMultiplier;
+		[SerializeField] private MouseLook m_MouseLook;
+		[SerializeField] private bool m_UseFovKick;
+		[SerializeField] private FOVKick m_FovKick = new FOVKick();
+		[SerializeField] private bool m_UseHeadBob;
+		[SerializeField] private CurveControlledBob m_HeadBob = new CurveControlledBob();
+		[SerializeField] private LerpControlledBob m_JumpBob = new LerpControlledBob();
+		[SerializeField] private float m_StepInterval;
+		[SerializeField] private AudioClip[] m_FootstepSounds;    // an array of footstep sounds that will be randomly selected from.
+		[SerializeField] private AudioClip m_JumpSound;           // the sound played when character leaves the ground.
+		[SerializeField] private AudioClip m_LandSound;           // the sound played when character touches back on ground.
 		[SerializeField] private AudioClip m_gunSound;    
+		[SerializeField] private AudioClip m_reloadSound;  
 		[SerializeField] private float m_squatspeed = 1;
-		[SerializeField] private bool m_squat;
 		[SerializeField] private GameObject m_particlePrefab;
 		[SerializeField] private GameObject m_Ak;
 		[SerializeField] private GameObject m_muzzle;
+		[SerializeField] private int m_bulletLimit = 30;
+		[SerializeField] private int m_bulletBox = 250;
+		[SerializeField] private GameObject m_enemy;
 
 
-        private Camera m_Camera;
-        private bool m_Jump;
-        private float m_YRotation;
+
+		private Camera m_Camera;
+		private bool m_Jump;
+		private float m_YRotation;
 		private float m_squatposition;
-        private Vector2 m_Input;
-        private Vector3 m_MoveDir = Vector3.zero;
-        private CharacterController m_CharacterController;
-        private CollisionFlags m_CollisionFlags;
-        private bool m_PreviouslyGrounded;
-        private Vector3 m_OriginalCameraPosition;
-        private float m_StepCycle;
-        private float m_NextStep;
-        private bool m_Jumping;
-        private AudioSource m_AudioSource;
-		private float speed;
+		private Vector2 m_Input;
+		private Vector3 m_MoveDir = Vector3.zero;
+		private CharacterController m_CharacterController;
+		private CollisionFlags m_CollisionFlags;
+		private bool m_PreviouslyGrounded;
+		private Vector3 m_OriginalCameraPosition;
+		private float m_StepCycle;
+		private float m_NextStep;
+		private bool m_Jumping;
+		private AudioSource m_AudioSource;
+		private float m_speed;
 		private bool m_WasSquat;
 		private GameObject m_Sparcle;
 		private GameObject m_Sparcle1;
 		private Vector3 m_bullethitpoint;
 		private float m_cooltime;
+		private int m_bulletNum;
+		private int score = 0;
+		private int m_enemyLife;
 
-        // Use this for initialization
-        private void Start()
-        {
-            m_CharacterController = GetComponent<CharacterController>();
-            m_Camera = Camera.main;
-            m_OriginalCameraPosition = m_Camera.transform.localPosition;
-            m_FovKick.Setup(m_Camera);
-            m_HeadBob.Setup(m_Camera, m_StepInterval);
-            m_StepCycle = 0f;
-            m_NextStep = m_StepCycle/2f;
-            m_Jumping = false;
-            m_AudioSource = GetComponent<AudioSource>();
+
+		// Use this for initialization
+		private void Start()
+		{
+			m_CharacterController = GetComponent<CharacterController>();
+			m_Camera = Camera.main;
+			m_OriginalCameraPosition = m_Camera.transform.localPosition;
+			m_FovKick.Setup(m_Camera);
+			m_HeadBob.Setup(m_Camera, m_StepInterval);
+			m_StepCycle = 0f;
+			m_NextStep = m_StepCycle/2f;
+			m_Jumping = false;
+			m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
 			m_WasSquat = false;
-			m_squat = false;
+			m_bulletNum = m_bulletLimit;
 
-        }
+		}
 
 
-        // Update is called once per frame
-        private void Update()
-        {
+		// Update is called once per frame
+		private void Update()
+		{
+
 			//ｃボタン押下でしゃがみ機能
-			m_IsSquat = Input.GetKeyDown (KeyCode.C);
-
-			if (m_IsSquat) {
-				if (!m_WasSquat) {
-					m_CharacterController.height = 0.9f;
-					m_squatposition = -0.5f;
-					m_WasSquat = true;
-					m_squat = true;
-
-				} else {
-					m_CharacterController.height = 1.8f;
-					m_squatposition = 0f;
-					m_WasSquat = false; 
-					m_squat = false;
-				}
+			if (Input.GetKeyDown (KeyCode.C)){
+				Squat ();
 			}
 
-				
-			if (Input.GetMouseButtonDown (0) && m_cooltime >= 0.5f) {
-
-				//効果音
-				m_AudioSource.PlayOneShot (m_gunSound);	
-
-				//銃口の爆発エフェクト生成
-				m_Sparcle  = (GameObject)Instantiate (m_particlePrefab,m_muzzle.transform.position , Quaternion.identity);
-				m_Sparcle.transform.parent = m_muzzle.transform;
-
-				//	rayの生成
-				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
-				RaycastHit hit;
-
-				//　着弾点を取得
-				if (Physics.Raycast (ray, out hit)){						
-					m_bullethitpoint = hit.point;										
-				}
-
-				//着弾点の爆発エフェクト
-				m_Sparcle1 = (GameObject)Instantiate (m_particlePrefab, m_bullethitpoint, Quaternion.identity);	
-
-				//　パーティクル削除	
-				Destroy (m_Sparcle, 0.2f);													
-				Destroy (m_Sparcle1, 0.2f);							
-
-				//　クールタイムの作成
-				m_cooltime = 0f;															
+			//	マウスボタン押下による爆発エフェクト生成
+			if (Input.GetMouseButtonDown (0) && m_cooltime >= 0.5f && m_bulletNum >= 0) {
+				ExplosionEffect ();
 			}
-			m_cooltime += Time.deltaTime;
+				m_cooltime += Time.deltaTime;
+			
 
+			//リロード機能
+			if (Input.GetKey (KeyCode.R) && m_bulletNum < 30) {
+				Reload ();
+			}
 
             RotateView();
             // the jump state needs to read here to make sure it is not missed
@@ -162,7 +139,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void FixedUpdate()
         {
-            GetInput(out speed);
+            GetInput(out m_speed);
             // always move along the camera forward as it is the direction that it being aimed at
 			Vector3 desiredMove = transform.forward*m_Input.y + transform.right*m_Input.x;
 
@@ -172,8 +149,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
                                m_CharacterController.height/2f, Physics.AllLayers, QueryTriggerInteraction.Ignore);
             desiredMove = Vector3.ProjectOnPlane(desiredMove, hitInfo.normal).normalized;
 
-            m_MoveDir.x = desiredMove.x*speed;
-            m_MoveDir.z = desiredMove.z*speed;
+            m_MoveDir.x = desiredMove.x*m_speed;
+            m_MoveDir.z = desiredMove.z*m_speed;
 
 
             if (m_CharacterController.isGrounded)
@@ -194,8 +171,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             m_CollisionFlags = m_CharacterController.Move(m_MoveDir*Time.fixedDeltaTime);
 
-            ProgressStepCycle(speed);
-            UpdateCameraPosition(speed);
+            ProgressStepCycle(m_speed);
+            UpdateCameraPosition(m_speed);
 
             m_MouseLook.UpdateCursorLock();
         }
@@ -325,5 +302,78 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             body.AddForceAtPosition(m_CharacterController.velocity*0.1f, hit.point, ForceMode.Impulse);
         }
+
+		private void Squat(){
+			
+				if (!m_WasSquat) {
+					m_CharacterController.height = 0.9f;
+					m_squatposition = -0.5f;
+					m_WasSquat = true;
+
+				} else {
+					m_CharacterController.height = 1.8f;
+					m_squatposition = 0f;
+					m_WasSquat = false;
+			}
+		}
+
+		private void ExplosionEffect(){
+				
+				//効果音
+				m_AudioSource.PlayOneShot (m_gunSound);	
+
+				//弾数減少
+				m_bulletNum --;
+				print (m_bulletBox+","+m_bulletNum);
+
+				//銃口の爆発エフェクト生成
+				m_Sparcle  = (GameObject)Instantiate (m_particlePrefab,m_muzzle.transform.position , Quaternion.identity);
+				m_Sparcle.transform.parent = m_muzzle.transform;
+
+				//	rayの生成
+				Ray ray = Camera.main.ScreenPointToRay (Input.mousePosition);
+				RaycastHit hit;
+
+				//　着弾点を取得
+				if (Physics.Raycast (ray, out hit)){
+
+				m_bullethitpoint = hit.point;
+
+				if (hit.collider.tag == "enemy") {
+					m_enemy = hit.collider.gameObject;
+					m_enemy.GetComponent<Enemy>().enemyLife--;
+					score ++;
+					print (m_enemy.GetComponent<Enemy>().enemyLife + "," + score);
+				}
+
+				if (hit.collider.tag == "hed") {
+					score += 10;
+					m_enemy.GetComponent<Enemy>().enemyLife--;
+					print (m_enemy.GetComponent<Enemy>().enemyLife + "," + score);
+				}
+
+
+			}
+
+				//着弾点の爆発エフェクト
+				m_Sparcle1 = (GameObject)Instantiate (m_particlePrefab, m_bullethitpoint, Quaternion.identity);	
+
+				//　パーティクル削除	
+				Destroy (m_Sparcle, 0.2f);													
+				Destroy (m_Sparcle1, 0.2f);							
+
+				//　クールタイムの作成
+				m_cooltime = 0f;															
+		}
+
+		private void Reload(){
+
+				m_AudioSource.PlayOneShot (m_reloadSound);
+				m_bulletBox -= m_bulletLimit;
+				m_bulletBox += m_bulletNum;
+				m_bulletNum = m_bulletLimit;
+				print (m_bulletBox+","+m_bulletNum);
+		}
+			
     }
 }
