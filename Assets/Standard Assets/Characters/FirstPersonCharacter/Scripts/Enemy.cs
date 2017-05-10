@@ -6,6 +6,7 @@ public class Enemy : MonoBehaviour {
 
 	public int enemyLife = 5;
 	Animator anim;
+	bool flag = false;
 	// Use this for initialization
 	void Start () {
 		anim = GetComponent<Animator> ();
@@ -14,15 +15,18 @@ public class Enemy : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		if (enemyLife <= 0) {
-			getUp ();
+		if (enemyLife <= 0 && !flag) {
+			StartCoroutine("getUp");
+			anim.SetBool ("getup", false);
+			flag = true;
 		}
 
 	}
 
 	IEnumerator getUp(){
 		yield return new WaitForSeconds (10f);
-		anim.SetBool ("getup", false);
+		anim.SetBool ("getup", true);
 		enemyLife = 5;
+		flag = false;
 	}
 }

@@ -337,19 +337,23 @@ namespace UnityStandardAssets.Characters.FirstPerson
 				//　着弾点を取得
 				if (Physics.Raycast (ray, out hit)){
 
-				m_bullethitpoint = hit.point;		
+				m_bullethitpoint = hit.point;
 
-					if (hit.collider.tag == "enemy") {
+				if (hit.collider.tag == "enemy") {
 					m_enemy = hit.collider.gameObject;
-					m_enemyLife = m_enemy.GetComponent<Enemy>().enemyLife;
-					m_enemyLife --;
-
-					}
-					if (hit.collider.tag == "hed") {
-						score += 10;
-					}	
-
+					m_enemy.GetComponent<Enemy>().enemyLife--;
+					score ++;
+					print (m_enemy.GetComponent<Enemy>().enemyLife + "," + score);
 				}
+
+				if (hit.collider.tag == "hed") {
+					score += 10;
+					m_enemy.GetComponent<Enemy>().enemyLife--;
+					print (m_enemy.GetComponent<Enemy>().enemyLife + "," + score);
+				}
+
+
+			}
 
 				//着弾点の爆発エフェクト
 				m_Sparcle1 = (GameObject)Instantiate (m_particlePrefab, m_bullethitpoint, Quaternion.identity);	

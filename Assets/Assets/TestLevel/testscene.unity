@@ -5168,6 +5168,7 @@ GameObject:
   - component: {fileID: 313639991}
   - component: {fileID: 313639990}
   - component: {fileID: 313639989}
+  - component: {fileID: 313639992}
   m_Layer: 0
   m_Name: hed
   m_TagString: hed
@@ -5227,7 +5228,7 @@ MeshCollider:
   m_GameObject: {fileID: 313639987}
   m_Material: {fileID: 0}
   m_IsTrigger: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Convex: 0
   m_InflateMesh: 0
@@ -5240,6 +5241,18 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 313639987}
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &313639992
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 313639987}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 0.3}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &315158699
 GameObject:
   m_ObjectHideFlags: 0
@@ -16140,6 +16153,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enemyLife: 5
+--- !u!65 &1021965076
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1021965073}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.8, y: 0.9, z: 0.1}
+  m_Center: {x: 0, y: 0.85, z: 0}
 --- !u!1 &1024428793
 GameObject:
   m_ObjectHideFlags: 0
