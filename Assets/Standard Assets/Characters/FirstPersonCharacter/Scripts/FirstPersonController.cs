@@ -81,7 +81,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
 			m_MouseLook.Init(transform , m_Camera.transform);
 			m_WasSquat = false;
 			m_bulletNum = m_bulletLimit;
-
 		}
 
 
@@ -324,7 +323,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
 				//弾数減少
 				m_bulletNum --;
-				print (m_bulletBox+","+m_bulletNum);
+				//print (m_bulletBox+","+m_bulletNum);
 
 				//銃口の爆発エフェクト生成
 				m_Sparcle  = (GameObject)Instantiate (m_particlePrefab,m_muzzle.transform.position , Quaternion.identity);
@@ -341,15 +340,24 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
 				if (hit.collider.tag == "enemy") {
 					m_enemy = hit.collider.gameObject;
-					m_enemy.GetComponent<Enemy>().enemyLife--;
+					m_enemy.GetComponent<Enemy> ().enemyLife--;
 					score ++;
-					print (m_enemy.GetComponent<Enemy>().enemyLife + "," + score);
+					print (m_enemyLife + "," + score);
 				}
 
 				if (hit.collider.tag == "hed") {
-					score += 10;
-					m_enemy.GetComponent<Enemy>().enemyLife--;
-					print (m_enemy.GetComponent<Enemy>().enemyLife + "," + score);
+					float length;
+					m_enemy = hit.collider.gameObject;
+					length = (m_enemy.transform.position - m_bullethitpoint).magnitude;
+					if( 0f < length && length < 0.08f) {
+						score += 10;
+					} else if (0.08f < length && length < 0.12f) {
+						score += 5;
+					} else {
+						score += 3;
+					}
+					m_enemy.transform.parent.GetComponent<Enemy> ().enemyLife--;
+					print (m_enemyLife + "," + score);
 				}
 
 
