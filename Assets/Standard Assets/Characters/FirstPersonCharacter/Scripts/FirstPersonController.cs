@@ -12,10 +12,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
     public class FirstPersonController : MonoBehaviour
 	{
 
-
-		public static int score = 0;
-
-
 		[SerializeField] private bool m_IsWalking;
 		[SerializeField] private bool m_IsSquat;
 		[SerializeField] private float m_WalkSpeed;
@@ -69,7 +65,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		private int m_bulletNum;
 		private float timer = 0f;
 		private GameObject m_enemy;
-	
+		private int score = 0;
 
 		// Use this for initialization
 		private void Start()
