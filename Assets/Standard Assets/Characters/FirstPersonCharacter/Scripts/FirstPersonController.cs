@@ -12,10 +12,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
     public class FirstPersonController : MonoBehaviour
 	{
 
-
-		public static int score = 0;
-
-
 		[SerializeField] private bool m_IsWalking;
 		[SerializeField] private bool m_IsSquat;
 		[SerializeField] private float m_WalkSpeed;
@@ -395,7 +391,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		}
 		void OnGUI(){
 
-			GUI.Label (position [0], "Time : " + timer, guiStyle);
+			GUI.Label (position [0], "Time : " + timer.ToString("f1"), guiStyle);
 			GUI.Label (position [1], "Pt : " + score.ToString (), guiStyle);
 			GUI.Label (position [2], "BulltBox : " + m_bulletBox, guiStyle);
 			GUI.Label (position [3], "Bullet : " + m_bulletNum + "/" + m_bulletLimit, guiStyle);
