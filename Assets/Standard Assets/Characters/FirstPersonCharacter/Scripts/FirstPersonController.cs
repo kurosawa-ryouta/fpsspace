@@ -11,6 +11,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
     [RequireComponent(typeof (AudioSource))]
     public class FirstPersonController : MonoBehaviour
 	{
+
 		[SerializeField] private bool m_IsWalking;
 		[SerializeField] private bool m_IsSquat;
 		[SerializeField] private float m_WalkSpeed;
@@ -37,8 +38,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		[SerializeField] private GameObject m_muzzle;
 		[SerializeField] private int m_bulletLimit = 30;
 		[SerializeField] private int m_bulletBox = 250;
-		[SerializeField] private GameObject m_enemy;
-
+		[SerializeField] private GUIStyle guiStyle;
+		[SerializeField] private Rect[] position;
 
 
 		private Camera m_Camera;
@@ -62,9 +63,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		private Vector3 m_bullethitpoint;
 		private float m_cooltime;
 		private int m_bulletNum;
+		private float timer = 0f;
+		private GameObject m_enemy;
 		private int score = 0;
-		private int m_enemyLife;
-
 
 		// Use this for initialization
 		private void Start()
@@ -87,6 +88,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		// Update is called once per frame
 		private void Update()
 		{
+
+			timer += Time.deltaTime;
 
 			//ｃボタン押下でしゃがみ機能
 			if (Input.GetKeyDown (KeyCode.C)){
@@ -316,6 +319,10 @@ namespace UnityStandardAssets.Characters.FirstPerson
 			}
 		}
 
+
+
+
+
 		private void ExplosionEffect(){
 				
 				//効果音
@@ -338,14 +345,15 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
 				m_bullethitpoint = hit.point;
 
+				//
 				if (hit.collider.tag == "enemy") {
 					m_enemy = hit.collider.gameObject;
-					m_enemy.GetComponent<Enemy> ().enemyLife--;
 					score ++;
-					print (m_enemyLife + "," + score);
+					m_enemy.transform.GetComponent<Enemy> ().enemyLife--;
 				}
 
 				if (hit.collider.tag == "hed") {
+					
 					float length;
 					m_enemy = hit.collider.gameObject;
 					length = (m_enemy.transform.position - m_bullethitpoint).magnitude;
@@ -357,12 +365,9 @@ namespace UnityStandardAssets.Characters.FirstPerson
 						score += 3;
 					}
 					m_enemy.transform.parent.GetComponent<Enemy> ().enemyLife--;
-					print (m_enemyLife + "," + score);
 				}
 
-
 			}
-
 				//着弾点の爆発エフェクト
 				m_Sparcle1 = (GameObject)Instantiate (m_particlePrefab, m_bullethitpoint, Quaternion.identity);	
 
@@ -374,14 +379,23 @@ namespace UnityStandardAssets.Characters.FirstPerson
 				m_cooltime = 0f;															
 		}
 
+
+
+
 		private void Reload(){
 
 				m_AudioSource.PlayOneShot (m_reloadSound);
 				m_bulletBox -= m_bulletLimit;
 				m_bulletBox += m_bulletNum;
 				m_bulletNum = m_bulletLimit;
-				print (m_bulletBox+","+m_bulletNum);
 		}
-			
+		void OnGUI(){
+
+			GUI.Label (position [0], "Time : " + timer.ToString("f1"), guiStyle);
+			GUI.Label (position [1], "Pt : " + score.ToString (), guiStyle);
+			GUI.Label (position [2], "BulltBox : " + m_bulletBox, guiStyle);
+			GUI.Label (position [3], "Bullet : " + m_bulletNum + "/" + m_bulletLimit, guiStyle);
+		}
+
     }
 }
