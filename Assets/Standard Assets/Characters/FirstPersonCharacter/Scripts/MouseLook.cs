@@ -22,7 +22,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private bool m_cursorIsLocked = true;
 
         public void Init(Transform character, Transform camera)
-        {
+		{			
             m_CharacterTargetRot = character.localRotation;
             m_CameraTargetRot = camera.localRotation;
         }

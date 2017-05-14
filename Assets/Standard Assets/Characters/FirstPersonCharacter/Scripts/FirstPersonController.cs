@@ -11,7 +11,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
     [RequireComponent(typeof (AudioSource))]
     public class FirstPersonController : MonoBehaviour
 	{
-
 		[SerializeField] private bool m_IsWalking;
 		[SerializeField] private bool m_IsSquat;
 		[SerializeField] private float m_WalkSpeed;
@@ -38,8 +37,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		[SerializeField] private GameObject m_muzzle;
 		[SerializeField] private int m_bulletLimit = 30;
 		[SerializeField] private int m_bulletBox = 250;
-		[SerializeField] private GUIStyle guiStyle;
-		[SerializeField] private Rect[] position;
+		[SerializeField] private GUIStyle m_guiStyle;
+		[SerializeField] private Rect[] m_position;
 
 
 		private Camera m_Camera;
@@ -63,9 +62,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		private Vector3 m_bullethitpoint;
 		private float m_cooltime;
 		private int m_bulletNum;
-		private float timer = 0f;
+		private float m_timer = 0f;
 		private GameObject m_enemy;
-		private int score = 0;
+		private int m_score = 0;
+		private bool m_zoom = false;
+
 
 		// Use this for initialization
 		private void Start()
@@ -89,7 +90,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 		private void Update()
 		{
 
-			timer += Time.deltaTime;
+			m_timer += Time.deltaTime;
 
 			//ｃボタン押下でしゃがみ機能
 			if (Input.GetKeyDown (KeyCode.C)){
@@ -108,7 +109,15 @@ namespace UnityStandardAssets.Characters.FirstPerson
 				Reload ();
 			}
 
+			//マウス右クリックでズーム
+			if (Input.GetMouseButtonDown (1)) {
+				zoom ();
+			}
+
+
             RotateView();
+
+
             // the jump state needs to read here to make sure it is not missed
             if (!m_Jump)
             {
@@ -234,8 +243,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
             {
                 m_Camera.transform.localPosition =
                     m_HeadBob.DoHeadBob(m_CharacterController.velocity.magnitude +
-                                      (speed*(m_IsWalking ? 1f : m_RunstepLenghten)));
-                newCameraPosition = m_Camera.transform.localPosition;
+						(speed*(m_IsWalking ? 1f : m_RunstepLenghten)));
+				newCameraPosition = m_Camera.transform.localPosition;
 				newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset() + m_squatposition;
             }
             else
@@ -285,7 +294,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void RotateView()
         {
-            m_MouseLook.LookRotation (transform, m_Camera.transform);
+			m_MouseLook.LookRotation (transform, m_Camera.transform);
         }
 
 
@@ -321,8 +330,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
 
 
-
-
 		private void ExplosionEffect(){
 				
 				//効果音
@@ -348,7 +355,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 				//
 				if (hit.collider.tag == "enemy") {
 					m_enemy = hit.collider.gameObject;
-					score ++;
+					m_score ++;
 					m_enemy.transform.GetComponent<Enemy> ().enemyLife--;
 				}
 
@@ -358,11 +365,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
 					m_enemy = hit.collider.gameObject;
 					length = (m_enemy.transform.position - m_bullethitpoint).magnitude;
 					if( 0f < length && length < 0.08f) {
-						score += 10;
+						m_score += 10;
 					} else if (0.08f < length && length < 0.12f) {
-						score += 5;
+						m_score += 5;
 					} else {
-						score += 3;
+						m_score += 3;
 					}
 					m_enemy.transform.parent.GetComponent<Enemy> ().enemyLife--;
 				}
@@ -389,12 +396,23 @@ namespace UnityStandardAssets.Characters.FirstPerson
 				m_bulletBox += m_bulletNum;
 				m_bulletNum = m_bulletLimit;
 		}
+
+		void zoom(){
+			if (!m_zoom) {
+				m_Camera.fieldOfView = 20;
+				m_zoom = true;
+			}else{
+				m_Camera.fieldOfView = 60; 
+				m_zoom = false;
+			}
+		}
+
 		void OnGUI(){
 
-			GUI.Label (position [0], "Time : " + timer.ToString("f1"), guiStyle);
-			GUI.Label (position [1], "Pt : " + score.ToString (), guiStyle);
-			GUI.Label (position [2], "BulltBox : " + m_bulletBox, guiStyle);
-			GUI.Label (position [3], "Bullet : " + m_bulletNum + "/" + m_bulletLimit, guiStyle);
+			GUI.Label (m_position [0], "Time : " + m_timer.ToString("f1"), m_guiStyle);
+			GUI.Label (m_position [1], "Pt : " + m_score.ToString (), m_guiStyle);
+			GUI.Label (m_position [2], "BulltBox : " + m_bulletBox, m_guiStyle);
+			GUI.Label (m_position [3], "Bullet : " + m_bulletNum + "/" + m_bulletLimit, m_guiStyle);
 		}
 
     }
