@@ -15,7 +15,15 @@ public class snipe : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 		if(Input.GetMouseButtonDown(1))
-			image.enabled = true;
+		{
+			bool flag = false;
+			if (!flag) {
+				image.gameObject.SetActive (true);
+				flag = true;
+			} else {
+				image.gameObject.SetActive (false);
+				flag = false;
+			}
 		}
 	}
-
+}

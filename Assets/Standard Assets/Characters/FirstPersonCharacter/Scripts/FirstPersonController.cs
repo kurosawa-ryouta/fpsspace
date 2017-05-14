@@ -11,10 +11,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
     [RequireComponent(typeof (AudioSource))]
     public class FirstPersonController : MonoBehaviour
 	{
-
-		public static Vector3 m_newCameraPosition;
-		public static bool m_newCameraPositionTrigger = false;
-
 		[SerializeField] private bool m_IsWalking;
 		[SerializeField] private bool m_IsSquat;
 		[SerializeField] private float m_WalkSpeed;
@@ -87,7 +83,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
 			m_MouseLook.Init(transform , m_Camera.transform);
 			m_WasSquat = false;
 			m_bulletNum = m_bulletLimit;
-			m_newCameraPosition = new Vector3 (0f, 0f, 0f);
 		}
 
 
@@ -114,15 +109,13 @@ namespace UnityStandardAssets.Characters.FirstPerson
 				Reload ();
 			}
 
+			//マウス右クリックでズーム
 			if (Input.GetMouseButtonDown (1)) {
-				m_newCameraPositionTrigger = true;
-				RotateviewTrigger ();
+				zoom ();
 			}
 
 
             RotateView();
-
-			m_newCameraPosition = new Vector3 (0f, 0f, 0f);
 
 
             // the jump state needs to read here to make sure it is not missed
@@ -251,7 +244,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 m_Camera.transform.localPosition =
                     m_HeadBob.DoHeadBob(m_CharacterController.velocity.magnitude +
 						(speed*(m_IsWalking ? 1f : m_RunstepLenghten)));
-                newCameraPosition = m_Camera.transform.localPosition;
+				newCameraPosition = m_Camera.transform.localPosition;
 				newCameraPosition.y = m_Camera.transform.localPosition.y - m_JumpBob.Offset() + m_squatposition;
             }
             else
@@ -303,20 +296,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
 			m_MouseLook.LookRotation (transform, m_Camera.transform);
         }
-
-
-		private void RotateviewTrigger(){
-
-			if (!m_zoom) {
-				m_newCameraPosition += new Vector3 (0f, 0f, 10f);
-				m_Ak.transform.localPosition -= new Vector3 (0f,0f,10f);
-				m_zoom = true;
-			} else {
-				m_newCameraPosition -= new Vector3 (0f, 0f, 10f);
-				m_Ak.transform.localPosition += new Vector3 (0f,0f,10f);
-				m_zoom = false;
-			}
-		}
 
 
         private void OnControllerColliderHit(ControllerColliderHit hit)
@@ -417,6 +396,17 @@ namespace UnityStandardAssets.Characters.FirstPerson
 				m_bulletBox += m_bulletNum;
 				m_bulletNum = m_bulletLimit;
 		}
+
+		void zoom(){
+			if (!m_zoom) {
+				m_Camera.fieldOfView = 20;
+				m_zoom = true;
+			}else{
+				m_Camera.fieldOfView = 60; 
+				m_zoom = false;
+			}
+		}
+
 		void OnGUI(){
 
 			GUI.Label (m_position [0], "Time : " + m_timer.ToString("f1"), m_guiStyle);

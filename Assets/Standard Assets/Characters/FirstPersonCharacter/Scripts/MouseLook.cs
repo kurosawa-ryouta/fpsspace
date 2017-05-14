@@ -23,9 +23,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         public void Init(Transform character, Transform camera)
 		{			
-				character.position += FirstPersonController.m_newCameraPosition;
-				camera.position += FirstPersonController.m_newCameraPosition;
-
             m_CharacterTargetRot = character.localRotation;
             m_CameraTargetRot = camera.localRotation;
         }
@@ -35,12 +32,6 @@ namespace UnityStandardAssets.Characters.FirstPerson
         {
             float yRot = CrossPlatformInputManager.GetAxis("Mouse X") * XSensitivity;
             float xRot = CrossPlatformInputManager.GetAxis("Mouse Y") * YSensitivity;
-
-			if (FirstPersonController.m_newCameraPositionTrigger) {
-				character.position += FirstPersonController.m_newCameraPosition;
-				camera.position += FirstPersonController.m_newCameraPosition;
-				FirstPersonController.m_newCameraPositionTrigger = false;
-			}
 
             m_CharacterTargetRot *= Quaternion.Euler (0f, yRot, 0f);
             m_CameraTargetRot *= Quaternion.Euler (-xRot, 0f, 0f);
