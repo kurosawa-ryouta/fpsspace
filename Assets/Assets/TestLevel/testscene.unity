@@ -29204,15 +29204,15 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 2}
       propertyPath: m_guiStyle.m_Normal.m_TextColor.r
-      value: 0.74264705
+      value: 0.6764706
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 2}
       propertyPath: m_guiStyle.m_Normal.m_TextColor.g
-      value: 0.74264705
+      value: 0.6764706
       objectReference: {fileID: 0}
     - target: {fileID: 11400000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 2}
       propertyPath: m_guiStyle.m_Normal.m_TextColor.b
-      value: 0.74264705
+      value: 0.6764706
       objectReference: {fileID: 0}
     - target: {fileID: 2000000, guid: 5e9e851c0e142814dac026a256ba2ac0, type: 2}
       propertyPath: field of view
