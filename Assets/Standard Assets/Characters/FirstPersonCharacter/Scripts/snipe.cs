@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class snipe : MonoBehaviour {
 
 	public Image image;
+	bool flag = false;
 	// Use this for initialization
 	void Start () {
 		
@@ -16,7 +17,6 @@ public class snipe : MonoBehaviour {
 	void Update () {
 		if(Input.GetMouseButtonDown(1))
 		{
-			bool flag = false;
 			if (!flag) {
 				image.gameObject.SetActive (true);
 				flag = true;
